@@ -17,6 +17,7 @@ type Transaction struct {
 	CreateTime int64 `json:"create_time"`
 	Memo string `json:"memo"`
 	Token string `json:"token"`
+	TxID string `json:"tx_id"`
 }
 const DB_TRANSACTIONS = "transactions"
 const DB_TRANS_FROM  = "from"
@@ -32,6 +33,7 @@ func (this *Transaction) Save(stub shim.ChaincodeStubInterface,token string) {
 	this.From = strings.ToLower(this.From)
 	this.To = strings.ToLower(this.To)
 	this.CreateTime = time.Now().Unix()
+	this.TxID = stub.GetTxID()
 	// fmt.Println(DB_TRANS_FROM+DB_TRANSACTIONS+token+this.From,this.Memo)
 	_ = stub.PutState(DB_TRANS_FROM+DB_TRANSACTIONS+token+this.From,this.Bytes())
 	// fmt.Println(DB_TRANS_TO+DB_TRANSACTIONS+token+this.To,this.Memo)

@@ -13,6 +13,36 @@ import (
 	`strings`
 )
 
+func (t *CTKChainCode) MiningRatio(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	allUSDT := module.GetAllUSDT(stub)
+	// every 100000 reduce 1
+	f , _ := common.TryGetDecimal(allUSDT).Float64()
+	ratiof := f / 100000.00
+	ratio := int(ratiof)
+	ratioCtk := 7000 - ratio
+	if ratioCtk < 100{
+		ratioCtk = 100
+	}
+	exchangeCTK := decimal.NewFromFloat(float64(ratioCtk) / 100.00)
+	
+	allWithdrawCTK := module.GetAllWithdrawCTK(stub)
+	// every 7000000 reduce 1
+	f , _ = common.TryGetDecimal(allWithdrawCTK).Float64()
+	ratiof = f / 7000000.00
+	ratioCtk = 7000 - int(ratiof)
+	if ratioCtk < 100{
+		ratioCtk = 100
+	}
+	canExchangUSDT := decimal.NewFromFloat(float64(ratioCtk)).Mul(decimal.NewFromInt32(100))
+	
+	return shim.Success(common.FormatSuccessResult(map[string]interface{}{
+		"allUSDT" : allUSDT,
+		"allWithdraw" : allWithdrawCTK,
+		"exchangeCTK" : exchangeCTK,
+		"canExchangUSDT" : canExchangUSDT,
+	}))
+}
+
 /**
 * Mining Exchange
 **/

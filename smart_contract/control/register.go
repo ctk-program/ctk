@@ -127,11 +127,9 @@ func (t *CTKChainCode) AppendSuper(stub shim.ChaincodeStubInterface, args []stri
 	}
 	tokenAccountInfo := t.GetTokenAccountInfo(stub,common.DEFAULT_TOKEN,appendParam.Account)
 	if tokenAccountInfo == nil{
-		return shim.Error("please become node first!" )
+		return shim.Error("account not exist!" )
 	}
-	if tokenAccountInfo.Role != common.NODE_ROLE_NORMAL{
-		return shim.Error("please become node first!" )
-	}
+
 	freezeMoney := t.GetNeedFreezeCTK(stub,tokenConfig,common.NODE_ROLE_SUPER)
 	if freezeMoney <= 0{
 		return shim.Error("freeze token config failed" )

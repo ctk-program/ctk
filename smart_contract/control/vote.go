@@ -73,6 +73,45 @@ func (t *CTKChainCode) Vote(stub shim.ChaincodeStubInterface, args []string) pee
 }
 
 /**
+* Vote Super account list
+**/
+func (t *CTKChainCode) VoteList(stub shim.ChaincodeStubInterface, args []string) peer.Response {
+	log.Logger.Info("##############vote for 31 node account###############")
+	//auto vote the 31 super supernodes from super node 17 main 14 second
+
+	var mortsAccounts module.MortageToken
+
+	b,err := stub.GetState(common.DB_MORT_RECORD)
+	if err != nil{
+		return shim.Error("not have enough super nodes !")
+	}
+	if len(b) <= 0 {
+		return shim.Error("mort accounts not enough!")
+	}
+	_ = json.Unmarshal(b,&mortsAccounts)
+	if len(mortsAccounts) < 1{
+		return shim.Error("not have enough super nodes !")
+	}
+	accountsMap := make([]module.Account,0)
+	for account,balance := range mortsAccounts{
+		accountInfo := t.GetTokenAccountInfo(stub,common.DEFAULT_TOKEN,account)
+		if accountInfo == nil{
+			continue
+		}
+		accountInfo.Balance = balance
+		accountsMap = append(accountsMap,*accountInfo)
+	}
+	if len(accountsMap) > 1{
+		// sort by balance
+		sort.Slice(accountsMap, func(i, j int) bool {
+			return t.TryGetDecimal(accountsMap[i].Balance).Cmp(t.TryGetDecimal(accountsMap[j].Balance)) > 0
+		})
+	}
+
+	return shim.Success(common.FormatSuccessResult(accountsMap))
+}
+
+/**
 * Vote Super 17 account
 **/
 func (t *CTKChainCode) VoteSuperNodes(stub shim.ChaincodeStubInterface, args []string) peer.Response {
