@@ -87,7 +87,6 @@ func (t *CTKChainCode) Transactions(stub shim.ChaincodeStubInterface, args []str
 	if err != nil {
 		return shim.Success(common.FormatSuccessResult(list))
 	}
-	fmt.Println("=======",historyIter.HasNext(),err)
 	for historyIter.HasNext(){
 		modification, err := historyIter.Next()
 		fmt.Println("=======",modification)

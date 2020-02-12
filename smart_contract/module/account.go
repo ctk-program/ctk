@@ -15,6 +15,10 @@ type Account struct {
 	Role  int `json:"role"`
 
 	PoolAddr string `json:"pool_addr"`
+	
+	Withdraw string `json:"withdraw"`
+	
+	Recharge string `json:"recharge"`
 
 }
 

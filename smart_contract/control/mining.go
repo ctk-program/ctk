@@ -75,6 +75,8 @@ func (t *CTKChainCode) Exchange(stub shim.ChaincodeStubInterface, args []string)
 		tokenAccountInfo.Address = exchangeParam.Account
 		tokenAccountInfo.Role = common.NODE_ROLE_USER
 		tokenAccountInfo.Balance = "0"
+		tokenAccountInfo.Withdraw = "0"
+		tokenAccountInfo.Recharge = "0"
 	}
 	
 	allUSDT := module.GetAllUSDT(stub)
@@ -90,6 +92,8 @@ func (t *CTKChainCode) Exchange(stub shim.ChaincodeStubInterface, args []string)
 	canExchangCTK := common.TryGetDecimal(exchangeParam.Amount).Mul(exchangeCTK)
 	balance := common.TryGetDecimal(tokenAccountInfo.Balance).Add(canExchangCTK)
 	tokenAccountInfo.Balance = balance.String()
+	recharge := common.TryGetDecimal(tokenAccountInfo.Recharge).Add(canExchangCTK)
+	tokenAccountInfo.Recharge = recharge.String()
 	tokenAccountInfo.Save(stub,common.DEFAULT_TOKEN)
 	module.AddMortUSDT(stub,exchangeParam.Amount)
 	module.ReduceCTK(stub,canExchangCTK.String())
@@ -149,7 +153,9 @@ func (t *CTKChainCode) Withdraw(stub shim.ChaincodeStubInterface, args []string)
 	canExchangUSDT := common.TryGetDecimal(exchangeParam.Amount).Div(decimal.NewFromFloat(float64(ratioCtk))).Mul(decimal.NewFromInt32(100))
 	
 	balance := common.TryGetDecimal(tokenAccountInfo.Balance).Sub(common.TryGetDecimal(exchangeParam.Amount))
+	withdraw := common.TryGetDecimal(tokenAccountInfo.Withdraw).Sub(common.TryGetDecimal(exchangeParam.Amount))
 	tokenAccountInfo.Balance = balance.String()
+	tokenAccountInfo.Withdraw = withdraw.String()
 	tokenAccountInfo.Save(stub,common.DEFAULT_TOKEN)
 	module.ReduceMortUSDT(stub,canExchangUSDT.String())
 	module.AddWithdrawCTK(stub,exchangeParam.Amount)
